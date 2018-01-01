@@ -1,0 +1,14 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/utils.html" as utils %}
+{% block styles %}
+{{ super() }}
+<meta charset="utf-8" />
+<link rel="stylesheet" href="{{ url_for('static',filename='dochap.css') }}">
+{% endblock styles %}
+{% block title %}Dochap{% endblock title%}
+{% block navbar %}
+{{ nav.basic_navbar.render() }}
+{% endblock navbar %}
+{% block content %}
+{{ utils.flashed_messages() }}
+{% endblock content %}

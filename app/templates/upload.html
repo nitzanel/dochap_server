@@ -1,0 +1,9 @@
+{% extends "base.html" %} 
+{% import "bootstrap/wtf.html" as wtf %} 
+{% block title %}File Upload{% endblock title %} 
+{% block content %} 
+<div class = "container"> 
+{{ wtf.quick_form(form,action=url_for('api_gtf_upload'),method="post") }} 
+</div> 
+{{ super() }} 
+{% endblock content %} 
