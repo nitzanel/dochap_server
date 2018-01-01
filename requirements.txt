@@ -1,3 +1,5 @@
+numpy
+dochap_tool
 flask
 flask-appconfig
 flask-bootstrap
