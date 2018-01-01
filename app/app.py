@@ -7,7 +7,6 @@ from flask_nav import Nav
 from flask_nav.elements import Navbar, View, Text
 from forms import UploadForm
 
-
 def create_app(config_file=None):
     app = flask.Flask('Dochap')
     app.secret_key = os.urandom(32)
@@ -17,6 +16,7 @@ def create_app(config_file=None):
     create_api(app)
     create_nav(app)
     return app
+
 
 
 def create_views(app):
@@ -37,6 +37,11 @@ def create_views(app):
     @app.route('/about')
     def about():
         return flask.render_template('about.html')
+
+
+    @app.route('/introduction')
+    def introduction():
+        return flask.render_template('introduction.html')
 
 
 def create_api(app):
@@ -60,6 +65,7 @@ def create_nav(app):
             View('Dochap', 'index'),
             View('Upload', 'upload'),
             View('About', 'about'),
+            View('Introduction','introduction'),
         )
     return nav
 
