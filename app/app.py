@@ -1,11 +1,11 @@
 import os
 import flask
+import conf
 from flask_appconfig import AppConfig
 from flask_bootstrap import Bootstrap
 from flask_nav import Nav
 from flask_nav.elements import Navbar, View, Text
-from flask_login import LoginManager, login_required, login_user, logout_user
-from forms import uploadForm
+from forms import UploadForm
 
 
 def create_app(config_file=None):
@@ -25,18 +25,18 @@ def create_views(app):
     """
     @app.route('/')
     def index():
-        flask.render_template('index.html')
+        return flask.render_template('index.html')
 
 
     @app.route('/upload')
     def upload():
-        form = uploadForm()
-        flask.render_template('upload.html',form=form)
+        form = UploadForm()
+        return flask.render_template('upload.html',form=form)
 
 
     @app.route('/about')
     def about():
-        flask.render_template('about.html')
+        return flask.render_template('about.html')
 
 
 def create_api(app):
@@ -45,7 +45,7 @@ def create_api(app):
     """
     @app.route('/api/1.0/gtf_upload')
     def api_gtf_upload():
-        form = uploadForm()
+        form = UploadForm()
         return 'success'
 
 def create_nav(app):
@@ -57,14 +57,13 @@ def create_nav(app):
     @nav.navigation()
     def basic_navbar():
         return Navbar(
-            title=('Dochap', 'index'),
-            items=(
-                View('Upload', 'upload'),
-                View('About', 'about'),
-            ),
+            View('Dochap', 'index'),
+            View('Upload', 'upload'),
+            View('About', 'about'),
         )
     return nav
 
 if __name__ == '__main__':
+    print(conf.supported_species)
     app = create_app()
     app.run('0.0.0.0',debug=True,port=5555)
