@@ -21,8 +21,6 @@ def create_html_pack(transcripts,specie):
         db_transcript_ids_by_symbol = db_transcript_ids_by_symbol,
         user_transcript_id_svg_dict = user_svgs_by_id_by_symbol,
     )
-    # fix bootstrap css link
-    html = html.replace('//cdnjs','http://cdnjs')
     with open('/tmp/compare.html','w') as f:
         f.write(html)
     response = flask.send_file('/tmp/compare.html',as_attachment=True)
@@ -48,7 +46,7 @@ def get_genes_svgs_and_variations(genes_ids_dict,specie):
         for index,domain_variant in enumerate(domains_variants):
             variant_text = f'domains variant: {index+1}'
             svg=draw_tool.draw_domains(domain_variant,variant_text)
-            svgs_by_symbol.append(svg)
+            svgs_by_symbol[symbol].append(svg)
             variants_by_symbol[symbol].append(variant_text)
 
     return svgs_by_symbol, variants_by_symbol

@@ -3,6 +3,18 @@
 {% block title %}Compare{% endblock title %}
 {% block navbar %}
 {% endblock navbar %}
+{% block styles %}
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+ <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+{% endblock styles %}
 {% block scripts %}
     <script type="text/javascript">
         // set up the gene-ids dict
@@ -14,6 +26,8 @@
         var db_transcript_ids_by_symbol = {{ db_transcript_ids_by_symbol|tojson|safe }};
         populate_gene_symbol_select();
         gene_select_callback();
+
+
         function populate_gene_symbol_select(){
             var select = document.getElementById("gene_symbol_select");
             clear_select(select);
@@ -25,28 +39,40 @@
             }
         }
 
+
         function gene_select_callback(){
             var gene_symbol = document.getElementById("gene_symbol_select").value;
             var ids = gene_ids_dict[gene_symbol];
+            var db_ids = db_transcript_ids_by_symbol[gene_symbol];
             var variations = gene_variations_dict[gene_symbol];
-            var select = document.getElementById("transcript_id_select");
-            clear_select(select);
-            for (var i =0; i<ids.length; i++){
-                var option = document.createElement("option");
-                option.text = ids[i];
-                option.value = ids[i];
-                select.appendChild(option);
-            }
-            select = document.getElementById("gene_variation_select");
-            clear_select(select);
-            for (var i =0; i<variations.length; i++){
-                var option = document.createElement("option");
-                option.text = variations[i];
-                option.value = variations[i];
-                select.appendChild(option);
-            }
+            // update select elemenents
+            update_select("transcript_id_select",ids);
+            update_select("gene_variation_select",variations,true);
+            update_select("db_transcript_id_select",db_ids);
+            // update the svg canvas
             show_svgs();
         }
+
+        function update_select(select_id,options_array,numeric_value=false){
+            var select = document.getElementById(select_id);
+            clear_select(select);
+            add_options_to_select(select,options_array,numeric_value);
+        }
+
+        function add_options_to_select(select,options_array,numeric_value=false){
+            for (var i=0; i<options_array.length; i++){
+                var option = document.createElement("option");
+                option.text = options_array[i];
+                if (numeric_value){
+                    option.value = i;
+                }
+                else{
+                    option.value = options_array[i];
+                }
+                select.appendChild(option);
+            }
+        }
+
 
         function clear_select(select_element){
             for(var i = select_element.options.length - 1 ; i >= 0 ; i--)
@@ -55,29 +81,50 @@
             }
         }
 
+
         function gene_variation_select_callback(){
             show_svgs();
         }
 
+
         function id_select_callback(){
             show_svgs();
         }
+
 
         function show_svgs(){
             var t_id = document.getElementById("transcript_id_select").value;
             var db_t_id = document.getElementById("db_transcript_id_select").value;
             var symbol = document.getElementById("gene_symbol_select").value;
             var gene_variation = document.getElementById("gene_variation_select").value;
-            var canvas = document.getElementById("svg_canvas")
-            clear_canvas(canvas);
+            var usr_canvas= document.getElementById("user_transcript_col");
+            var db_canvas = document.getElementById("db_transcript_col");
+
+            clear_canvas(usr_canvas);
+            clear_canvas(db_canvas);
             user_svg_string = user_transcript_id_svg_dict[symbol][t_id];
-            create_svg(canvas,user_svg_string);
+            db_transcript_svg_string = db_transcript_id_svg_dict[db_t_id];
+            db_domains_svg_string = db_gene_svg_list_dict[symbol][gene_variation];
+            if (db_transcript_svg_string){
+                add_svg(db_canvas,db_transcript_svg_string);
+                if (db_domains_svg_string){
+                    db_canvas.innerHTML += "<br>";
+                    add_svg(db_canvas,db_domains_svg_string);
+                }
+            }
+            add_svg(usr_canvas,user_svg_string);
+            if (db_domains_svg_string){
+                usr_canvas.innerHTML += "<br>";
+                add_svg(usr_canvas,db_domains_svg_string);
+            }
             console.log("show "+ symbol +"(variant "+ gene_variation + ")," + t_id );
         }
 
-        function create_svg(canvas,svg_string){
+
+        function add_svg(canvas,svg_string){
             canvas.innerHTML += svg_string;
         }
+
 
         function clear_canvas(canvas){
             canvas.innerHTML = "";
@@ -87,25 +134,34 @@
 {% endblock scripts %}
 {% block content %}
 <div class = "container">
-    Gene symbol:
-    <select id="gene_symbol_select" onchange="gene_select_callback();">
-    </select>
-    Domains Variation:
-    <select id="gene_variation_select" onchange="gene_variation_select_callback();">
-    </select>
-    <br>
-    Transcript id:
-    <select id="transcript_id_select" onchange="id_select_callback();">
-    </select>
-    Db transcript id:
-    <select id="db_transcript_id_select" onchange="id_select_callback();">
-    </select>
-    </br>
-    <div id="svg_canvas">
+    <div class="row">
+        <div class="col-md-6">
+            Gene symbol:
+            <select id="gene_symbol_select" onchange="gene_select_callback();">
+            </select>
+            <br>
+            Transcript id:
+            <select id="transcript_id_select" onchange="id_select_callback();">
+            </select>
+        </div>
+        <div class="col-md-6">
+            Domains Variation:
+            <select id="gene_variation_select" onchange="gene_variation_select_callback();">
+            </select>
+            <br>
+            Database transcript id:
+            <select id="db_transcript_id_select" onchange="id_select_callback();">
+            </select>
+        </div>
     </div>
-
-<p>
-</p>
-</div>
+        <div id="svg_canvas" class="row">
+            <div id="user_transcript_col" class="col-md-6">
+            </div>
+            <div id="db_transcript_col" class="col-md-6">
+            </div>
+        </div>
+    <p>
+    </p>
+    </div>
 {{ super() }}
 {% endblock content %}
