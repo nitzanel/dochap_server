@@ -6,10 +6,11 @@
 {% block scripts %}
     <script type="text/javascript">
         // set up the gene-ids dict
-        var gene_variations_dict = {{ genes_variations_dict|tojson|safe }};
+        var gene_variations_dict = {{ gene_variations_dict|tojson|safe }};
         var gene_ids_dict = {{ genes_ids_dict|tojson|safe }};
         var user_transcript_id_svg_dict = {{ user_transcript_id_svg_dict|tojson|safe }};
         var db_transcript_id_svg_dict = {{ db_transcript_id_svg_dict|tojson|safe }};
+        var db_transcript_ids_by_symbol = {{ db_transcript_ids_by_symbol|tojson|safe }};
         var db_gene_svg_list_dict= {{ db_gene_svg_list_dict|tojson|safe }};
         populate_gene_symbol_select();
         gene_select_callback();
