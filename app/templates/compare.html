@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}Compare{% endblock title %}
+{% block navbar %}
+{% endblock navbar %}
+{% block scripts %}
+    <script type="text/javascript">
+        // set up the gene-ids dict
+        var gene_variations_dict = {{ genes_variations_dict|tojson|safe }};
+        var gene_ids_dict = {{ genes_ids_dict|tojson|safe }};
+        var user_transcript_id_svg_dict = {{ user_transcript_id_svg_dict|tojson|safe }};
+        var db_transcript_id_svg_dict = {{ db_transcript_id_svg_dict|tojson|safe }};
+        var db_gene_svg_list_dict= {{ db_gene_svg_list_dict|tojson|safe }};
+        populate_gene_symbol_select();
+        gene_select_callback();
+        function populate_gene_symbol_select(){
+            var select = document.getElementById("gene_symbol_select");
+            clear_select(select);
+            for (var gene in gene_ids_dict){
+                var option = document.createElement("option");
+                option.text = gene;
+                option.value = gene;
+                select.appendChild(option);
+            }
+        }
+
+        function gene_select_callback(){
+            var gene_symbol = document.getElementById("gene_symbol_select").value;
+            var ids = gene_ids_dict[gene_symbol];
+            var variations = gene_variations_dict[gene_symbol];
+            var select = document.getElementById("transcript_id_select");
+            clear_select(select);
+            for (var i =0; i<ids.length; i++){
+                var option = document.createElement("option");
+                option.text = ids[i];
+                option.value = ids[i];
+                select.appendChild(option);
+            }
+            select = document.getElementById("gene_variation_select");
+            clear_select(select);
+            for (var i =0; i<variations.length; i++){
+                var option = document.createElement("option");
+                option.text = variations[i];
+                option.value = variations[i];
+                select.appendChild(option);
+            }
+            show_svgs();
+        }
+
+        function clear_select(select_element){
+            for(var i = select.options.length - 1 ; i >= 0 ; i--)
+            {
+                select.remove(i);
+            }
+        }
+
+        function gene_variation_select_callback(){
+            show_svgs();
+        }
+
+        function id_select_callback(){
+            show_svgs();
+        }
+
+        function show_svgs(){
+            var t_id = document.getElementById("transcript_id_select").value;
+            var symbol = document.getElementById("gene_symbol_select").value;
+            var gene_variation = document.getElementById("gene_variation_select").value;
+            console.log("show "+ symbol +"(variant "+ gene_variation + ")," + t_id );
+        }
+
+    </script>
+{% endblock scripts %}
+{% block content %}
+<div class = "container">
+    <select id="gene_symbol_select" onchange="gene_select_callback();">
+    </select>
+    <select id="gene_variation_select" onchange="gene_variation_select_callback();">
+    </select>
+    <br>
+    <select id="transcript_id_select" onchange="id_select_callback();">
+    </select>
+    </br>
+<p>
+</p>
+</div>
+{{ super() }}
+{% endblock content %}

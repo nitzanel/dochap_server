@@ -8,3 +8,4 @@ flask-debug
 flask-wtf
 flask-nav
 flask-mail
+pygments

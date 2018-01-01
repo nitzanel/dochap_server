@@ -8,4 +8,3 @@ class UploadForm(FlaskForm):
     specie_selection = SelectField('Specie',choices=conf.supported_species,validators=[DataRequired()])
     submit = SubmitField('Upload',render_kw={'class':'btn btn-primary'})
 
-

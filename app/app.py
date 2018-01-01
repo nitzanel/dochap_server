@@ -1,11 +1,15 @@
+import utils
+import conf
+import compare_gen
 import os
 import flask
-import conf
 from flask_appconfig import AppConfig
 from flask_bootstrap import Bootstrap
 from flask_nav import Nav
 from flask_nav.elements import Navbar, View, Text
 from forms import UploadForm
+from jinja2 import Environment, FileSystemLoader
+# dochap tool
 
 def create_app(config_file=None):
     app = flask.Flask('Dochap')
@@ -25,7 +29,8 @@ def create_views(app):
     """
     @app.route('/')
     def index():
-        return flask.render_template('index.html')
+        response = flask.render_template('index.html')
+        return response
 
 
     @app.route('/upload')
@@ -43,15 +48,20 @@ def create_views(app):
     def introduction():
         return flask.render_template('introduction.html')
 
-
 def create_api(app):
     """
     Register api routes for the app
     """
-    @app.route('/api/1.0/gtf_upload')
+    @app.route('/api/1.0/gtf_upload',methods=['POST'])
     def api_gtf_upload():
         form = UploadForm()
-        return 'success'
+        save_path = '/tmp/uploaded_gtf'
+        form.gtf_file.data.save(save_path)
+        user_transcripts = utils.parse_gtf_file(save_path)
+        os.remove(save_path)
+        flask_response = compare_gen.create_html_pack(user_transcripts)
+        return flask_response
+
 
 def create_nav(app):
     """
@@ -70,6 +80,5 @@ def create_nav(app):
     return nav
 
 if __name__ == '__main__':
-    print(conf.supported_species)
     app = create_app()
     app.run('0.0.0.0',debug=True,port=5555)
