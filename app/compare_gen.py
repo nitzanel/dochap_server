@@ -1,13 +1,14 @@
 from dochap_tool.gtf_utils import parser as gtf_parser
 from dochap_tool.draw_utils import draw_tool
 from dochap_tool.compare_utils import compare_exons
+import utils
 import flask
 
 
 def create_html_pack(transcripts,specie):
     # get needed data
     genes_ids_dict = get_genes_ids_dict(transcripts)
-    svgs_by_symbol, variants_by_symbol= get_gene_svgs(genes_ids_dict,specie)
+    svgs_by_symbol, variants_by_symbol = get_genes_svgs_and_variations(genes_ids_dict,specie)
     db_transcripts_svgs_by_id,db_transcript_ids_by_symbol = get_transcripts_svgs(genes_ids_dict,specie)
     user_svgs_by_id_by_symbol = get_user_svgs_by_id(transcripts,genes_ids_dict)
     # render it
@@ -43,6 +44,7 @@ def get_genes_svgs_and_variations(genes_ids_dict,specie):
     for symbol in domains_by_symbol:
         svgs_by_symbol[symbol] = []
         variants_by_symbol[symbol] = []
+        domains_variants = domains_by_symbol[symbol]
         for index,domain_variant in enumerate(domains_variants):
             variant_text = f'domains variant: {index+1}'
             svg=draw_tool.draw_domains(domain_variant,variant_text)
@@ -73,9 +75,9 @@ def get_user_svgs_by_id(transcripts,genes_ids_dict):
     symbols = genes_ids_dict.keys()
     svg_by_symbol_by_id = {}
     for symbol in symbols:
-        transcripts = gtf_parser.get_transcripts_by_gene_symbol(transcripts,symbol)
+        transcripts_of_gene = gtf_parser.get_transcripts_by_gene_symbol(transcripts,symbol)
         svg_by_symbol_by_id[symbol] = {}
-        for t_id, exon_list in transcripts.items():
+        for t_id, exon_list in transcripts_of_gene.items():
             t_id_text = f'transcript_id: {t_id}'
             svg = draw_tool.draw_exons(exon_list,t_id_text)
             svg_by_symbol_by_id[symbol][t_id] = svg

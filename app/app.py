@@ -59,7 +59,9 @@ def create_api(app):
         form.gtf_file.data.save(save_path)
         user_transcripts = utils.parse_gtf_file(save_path)
         os.remove(save_path)
-        flask_response = compare_gen.create_html_pack(user_transcripts)
+        specie = form.specie_selection.data
+        print(f'specieis: {specie}')
+        flask_response = compare_gen.create_html_pack(user_transcripts,specie)
         return flask_response
 
 

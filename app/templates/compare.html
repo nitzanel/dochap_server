@@ -6,12 +6,12 @@
 {% block scripts %}
     <script type="text/javascript">
         // set up the gene-ids dict
+        var db_gene_svg_list_dict= {{ db_gene_svg_list_dict|tojson|safe }};
         var gene_variations_dict = {{ gene_variations_dict|tojson|safe }};
         var gene_ids_dict = {{ genes_ids_dict|tojson|safe }};
         var user_transcript_id_svg_dict = {{ user_transcript_id_svg_dict|tojson|safe }};
         var db_transcript_id_svg_dict = {{ db_transcript_id_svg_dict|tojson|safe }};
         var db_transcript_ids_by_symbol = {{ db_transcript_ids_by_symbol|tojson|safe }};
-        var db_gene_svg_list_dict= {{ db_gene_svg_list_dict|tojson|safe }};
         populate_gene_symbol_select();
         gene_select_callback();
         function populate_gene_symbol_select(){
@@ -49,9 +49,9 @@
         }
 
         function clear_select(select_element){
-            for(var i = select.options.length - 1 ; i >= 0 ; i--)
+            for(var i = select_element.options.length - 1 ; i >= 0 ; i--)
             {
-                select.remove(i);
+                 select_element.remove(i);
             }
         }
 
@@ -65,23 +65,45 @@
 
         function show_svgs(){
             var t_id = document.getElementById("transcript_id_select").value;
+            var db_t_id = document.getElementById("db_transcript_id_select").value;
             var symbol = document.getElementById("gene_symbol_select").value;
             var gene_variation = document.getElementById("gene_variation_select").value;
+            var canvas = document.getElementById("svg_canvas")
+            clear_canvas(canvas);
+            user_svg_string = user_transcript_id_svg_dict[symbol][t_id];
+            create_svg(canvas,user_svg_string);
             console.log("show "+ symbol +"(variant "+ gene_variation + ")," + t_id );
+        }
+
+        function create_svg(canvas,svg_string){
+            canvas.innerHTML += svg_string;
+        }
+
+        function clear_canvas(canvas){
+            canvas.innerHTML = "";
         }
 
     </script>
 {% endblock scripts %}
 {% block content %}
 <div class = "container">
+    Gene symbol:
     <select id="gene_symbol_select" onchange="gene_select_callback();">
     </select>
+    Domains Variation:
     <select id="gene_variation_select" onchange="gene_variation_select_callback();">
     </select>
     <br>
+    Transcript id:
     <select id="transcript_id_select" onchange="id_select_callback();">
     </select>
+    Db transcript id:
+    <select id="db_transcript_id_select" onchange="id_select_callback();">
+    </select>
     </br>
+    <div id="svg_canvas">
+    </div>
+
 <p>
 </p>
 </div>
