@@ -9,7 +9,7 @@ def create_html_pack(transcripts,specie):
     # get needed data
     genes_ids_dict = get_genes_ids_dict(transcripts)
     svgs_by_symbol, variants_by_symbol = get_genes_svgs_and_variations(genes_ids_dict,specie)
-    db_transcripts_svgs_by_id,db_transcript_ids_by_symbol = get_transcripts_svgs(genes_ids_dict,specie)
+    db_transcripts_svgs_by_id, db_transcripts_svgs_real_pos_by_id, db_transcript_ids_by_symbol = get_transcripts_svgs(genes_ids_dict,specie)
     user_svgs_by_id_by_symbol = get_user_svgs_by_id(transcripts,genes_ids_dict)
     # render it
     html = flask.render_template(
@@ -18,6 +18,7 @@ def create_html_pack(transcripts,specie):
         db_gene_svg_list_dict = svgs_by_symbol,
         gene_variations_dict = variants_by_symbol,
         db_transcript_id_svg_dict = db_transcripts_svgs_by_id,
+        db_transcript_id_svg_real_dict = db_transcripts_svgs_real_pos_by_id,
         db_transcript_ids_by_symbol = db_transcript_ids_by_symbol,
         user_transcript_id_svg_dict = user_svgs_by_id_by_symbol,
     )
@@ -57,17 +58,20 @@ def get_transcripts_svgs(genes_ids_dict,specie):
     for symbol in symbols:
         transcripts_dict = compare_exons.get_exons_from_gene_symbol('data',specie,symbol)
         transcripts_dict_by_symbol[symbol] = transcripts_dict
-    transcripts_svgs_by_id= {}
+    transcripts_svgs_by_id = {}
+    transcripts_svgs_real_by_id = {}
     db_transcript_ids_by_symbol = {}
     for symbol in transcripts_dict_by_symbol:
         db_transcript_ids_by_symbol[symbol] = []
         for t_id,exon_list in transcripts_dict_by_symbol[symbol].items():
             t_id_text = f'transcript_id: {t_id}'
             svg = draw_tool.draw_exons(exon_list,t_id_text)
+            real_svg = draw_tool.draw_exons(exon_list, id_text);
             transcripts_svgs_by_id[t_id] = svg
+            transcripts_svgs_real_by_id[t_id] = real_svg
             db_transcript_ids_by_symbol[symbol].append(t_id)
 
-    return transcripts_svgs_by_id,db_transcript_ids_by_symbol
+    return transcripts_svgs_by_id, transcripts_svgs_real_by_id, db_transcript_ids_by_symbol
 
 def get_user_svgs_by_id(transcripts,genes_ids_dict):
     symbols = genes_ids_dict.keys()
