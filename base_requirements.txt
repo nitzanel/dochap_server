@@ -1,0 +1,11 @@
+numpy
+biopython
+flask
+flask-appconfig
+flask-bootstrap
+flask-debugtoolbar
+flask-debug
+flask-wtf
+flask-nav
+flask-mail
+pygments
