@@ -7,3 +7,21 @@
 </div> 
 {{ super() }} 
 {% endblock content %} 
+{% block scripts %}
+    <script>
+        function fileUploadCallback(){
+            var file = document.getElementById("gtfUpload").files[0];
+            var fileSize = file.size;
+            var reader = new FileReader();
+            reader.readAsText(file);
+            reader.onload = function(e){ readCallback(e);}
+        }
+
+        function readCallback(e){
+            var result = e.target.result;
+            // TODO
+            // extract transcripts ids and names
+
+        }
+    </script>
+{% endblock %}
