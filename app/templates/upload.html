@@ -4,11 +4,29 @@
 {% block content %} 
 <div class = "container"> 
 {{ wtf.quick_form(form,action=url_for('api_gtf_upload'),method="post") }} 
+<br>
+<div class="row">
+    <div class="col-md-4">
+        <select id="geneSelect" onchange="chooseGeneCallback();"> </select>
+    </div>
+    <div class="col-md-4">
+        <select id="transcriptSelect"> </select>
+    </div>
+    <div class="col-md-4">
+        <button class="btn-primary" id="addButton" onclick="chooseClicked();">Choose</button>
+    </div>
+</div>
+<div id="selectedGenes">
+</div>
+
 </div> 
 {{ super() }} 
 {% endblock content %} 
 {% block scripts %}
     <script>
+        var transcriptsInformation = {}; 
+        var transcriptsByGene = {};
+
         function fileUploadCallback(){
             var file = document.getElementById("gtfUpload").files[0];
             var fileSize = file.size;
@@ -19,9 +37,72 @@
 
         function readCallback(e){
             var result = e.target.result;
-            // TODO
-            // extract transcripts ids and names
+            var lines = result.split('\n');
+            for (var i = 0, line = lines[i]; i < lines.length; i++){
+                var splitLine = line.split('\t');
+                if (splitLine[2] == 'transcript'){
+                    // get the transcript id and gene name
+                    var transcriptParams = splitLine[8].split(' ');
+                    console.log(transcriptParams);
+                    var data = {};
+                    var geneIndex = transcriptParams.indexOf("gene_id");
+                    var geneValue = transcriptParams[geneIndex+1];
+                    if (geneValue){
+                        data['gene_id'] = geneValue.replace(/[\";]/g,'');
+                    }
+                    var t_index = transcriptParams.indexOf('transcript_id');
+                    var t_value = transcriptParams[t_index+1];
+                    if (t_value){
+                        data['transcript_id'] = t_value.replace(/[\";]/g,'');
+                    }
+                    var fpkm_index = transcriptParams.indexOf('fpkm');
+                    var fpkm_value = transcriptParams[fpkm_index+1];
+                    if (fpkm_value){
+                        data['fpkm'] = fpkm_value.replace(/[\";]/g,'');
+                    }
+                    if (! Array.isArray(transcriptsByGene[data['gene_id']])){
+                        transcriptsByGene[data['gene_id']] = [];
+                    }
+                    console.log(data);
+                    transcriptsByGene[data['gene_id']].push(data['transcript_id']);
+                    transcriptsInformation[data['transcript_id']] = data;
+                }
+
+            }
+            displayFileData();
+        }
+
+        function displayFileData(){
+            // fill the options of select with genes names
+            var genesNames = Object.keys(transcriptsByGene);
+            clearAndFillSelect('geneSelect', genesNames);
+            chooseGeneCallback();
+        }
+
+        function chooseGeneCallback(){
+            var geneName = document.getElementById('geneSelect').value;
+            var transcripts = transcriptsByGene[geneName]; 
+            clearAndFillSelect('transcriptSelect', transcripts);
+            // create related options
+        }
+
+        function clearAndFillSelect(select_id, options){
+            var selectElement = document.getElementById(select_id);
+            for (var i = selectElement.options.length - 1; i>=0; i--){
+                selectElement.remove(i);
+            }
+            for (var i=0; i<options.length; i++){
+                var option = document.createElement("option");
+                option.text = options[i];
+                options.value = options[i];
+                selectElement.appendChild(option);
+            }
 
         }
+
+        function chooseClicked(){
+            console.log('chosen');
+        }
+
     </script>
 {% endblock %}
