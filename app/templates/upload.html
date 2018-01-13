@@ -5,8 +5,16 @@
 <div class = "container"> 
 {{ wtf.quick_form(form,action=url_for('api_gtf_upload'),method="post") }} 
 <br>
+<div id="loadDiv" style="visibility:hidden;" class="row">
+    <img src="{{ url_for('static', filename='ajax-loader.gif') }}">
+</div>
+<div class="row">
+    <input type="text" id="geneInput" oninput="geneSearchCallback();" list="genesOptions">
+    <datalist id="genesOptions"> </datalist>
+</div>
 <div class="row">
     <div class="col-md-4">
+        <select id="geneSelect" onchange="chooseGeneCallback();"> </select>
     </div>
     <div class="col-md-4">
         <select id="transcriptSelect"> </select>
@@ -25,18 +33,20 @@
     <script>
         var transcriptsInformation = {}; 
         var transcriptsByGene = {};
-        var genesNames = null;
+        var genesNames = [];
 
         function fileUploadCallback(){
+            showLoad();
             var file = document.getElementById("gtfUpload").files[0];
             var name = file.name;
             var fileSize = file.size;
             if (fileSize > 10000000){
-                alert("file " + name+ " Is over the size limit (10mb)");
+                //alert("file " + name+ " Is over the size limit (10mb)");
+                //return;
             }
             var reader = new FileReader();
             reader.readAsText(file);
-            reader.onload = function(e){ readCallback(e);}
+            reader.onload = function(e){ readCallback(e);};
         }
 
         function readCallback(e){
@@ -70,7 +80,6 @@
                     if (! Array.isArray(transcriptsByGene[data['gene_id']])){
                         transcriptsByGene[data['gene_id']] = [];
                     }
-                    console.log(data);
                     transcriptsByGene[data['gene_id']].push(data['transcript_id']);
                     transcriptsInformation[data['transcript_id']] = data;
                 }
@@ -78,50 +87,69 @@
             }
             
             genesNames = Object.keys(transcriptsByGene);
+            search('', true);
+            hideLoad();
         }
 
-        function search(searchString){ 
+        function geneSearchCallback(){
+            var searchString = document.getElementById("geneInput").value;
+            search(searchString);
+        }
+
+        function search(searchString, allowAll=false){ 
             var matcher = new FuzzyMatch(searchString);
             var counter = 0;
-            var maxSearches = 100;
+            var maxSearches = 500;
+            var options = [];
             for (var i=0; i < genesNames.length; i++){
                 if (counter > maxSearches){
-                    return false;
+                    break;
                 }
-                if (matcher.match(genesNames[i])){
-                    // TODO - add to options for autocompelete or something
+                if (matcher.match(genesNames[i]) || allowAll){
+                    options.push(genesNames[i]);
                     counter++; 
                 }
             }
+            clearAndFillOptions('geneSelect', options);
+            clearAndFillOptions('genesOptions', options);
+            chooseGeneCallback();
         }
 
-        function chooseGene(geneName){
+        function chooseGeneCallback(){
+            var geneName = document.getElementById("geneSelect").value;
+            if (!geneName){
+                clearAndFillOptions('transcriptsSelect',[]);
+                return;
+            }
             var transcripts = transcriptsByGene[geneName]; 
             var transcriptsData=[];
             var orderedTranscripts = [];
             for (var i = 0; i< transcripts.length; i++){
                 var data = {
-                    'transcript':transcripts[i],
-                    'fpkm': transcriptsInformation[transcripts[i]]['fpkm']
+                    "transcript":transcripts[i],
+                    "fpkm": transcriptsInformation[transcripts[i]]['fpkm']
                 };
                 transcriptsData.push(data);
             }
             transcriptsData.sort(function(t1,t2){
                 return t2['fpkm'] - t1['fpkm'];
             });
-            clearAndFillSelect('transcriptSelect', transcriptsData, true);
+            clearAndFillOptions('transcriptSelect', transcriptsData, true);
             // create related options
         }
 
-        function clearAndFillSelect(select_id, options, use_keys=false){
+        function clearAndFillOptions(select_id, options, use_keys=false){
             var selectElement = document.getElementById(select_id);
-            for (var i = selectElement.options.length - 1; i>=0; i--){
-                selectElement.remove(i);
+            if (!selectElement){
+                console.error(select_id);
+            }
+            for (var i = selectElement.children.length - 1; i>=0; i--){
+                selectElement.removeChild(selectElement.children[i]);
             }
             for (var i=0; i<options.length; i++){
                 var option = document.createElement("option");
                 if (use_keys){
-                    option.text = options[i]['transcript'] + ' ' + options[i]['fpkm'];
+                    option.text = options[i]['transcript']; //+ ' ' + options[i]['fpkm'];
                     option.value = options[i]['transcript'];
                 } else{
                     option.text = options[i];
@@ -132,13 +160,25 @@
 
         }
 
+        function showLoad(){
+            var div = document.getElementById("loadDiv");
+            div.style.visibility = "visible";
+            console.log('start loading');
+        }
+
+        function hideLoad(){
+            var div = document.getElementById("loadDiv");
+            div.style.visibility = "hidden";
+            console.log('done loading');
+        }
+
         function chooseClicked(){
             console.log('chosen');
         }
 
-        class FuzzyMatch(){
+        class FuzzyMatch{
             constructor(searchString){
-                this.pattern = new RegExp('('+searchString.split('').join(').*?(')+').*?', 'i');
+                this.pattern = new RegExp('('+searchString.split('').join(').*?(')+').*?','i');
             }
 
             match(someString){
