@@ -15,6 +15,7 @@ def create_app(config_file=None):
     app = flask.Flask('Dochap')
     app.secret_key = os.urandom(32)
     AppConfig(app,config_file)
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
     Bootstrap(app)
     create_views(app)
     create_api(app)

@@ -7,7 +7,6 @@
 <br>
 <div class="row">
     <div class="col-md-4">
-        <select id="geneSelect" onchange="chooseGeneCallback();"> </select>
     </div>
     <div class="col-md-4">
         <select id="transcriptSelect"> </select>
@@ -26,10 +25,15 @@
     <script>
         var transcriptsInformation = {}; 
         var transcriptsByGene = {};
+        var genesNames = null;
 
         function fileUploadCallback(){
             var file = document.getElementById("gtfUpload").files[0];
+            var name = file.name;
             var fileSize = file.size;
+            if (fileSize > 10000000){
+                alert("file " + name+ " Is over the size limit (10mb)");
+            }
             var reader = new FileReader();
             reader.readAsText(file);
             reader.onload = function(e){ readCallback(e);}
@@ -38,12 +42,12 @@
         function readCallback(e){
             var result = e.target.result;
             var lines = result.split('\n');
-            for (var i = 0, line = lines[i]; i < lines.length; i++){
+            for (var i = 0; i < lines.length; i++){
+                var line = lines[i];
                 var splitLine = line.split('\t');
                 if (splitLine[2] == 'transcript'){
                     // get the transcript id and gene name
                     var transcriptParams = splitLine[8].split(' ');
-                    console.log(transcriptParams);
                     var data = {};
                     var geneIndex = transcriptParams.indexOf("gene_id");
                     var geneValue = transcriptParams[geneIndex+1];
@@ -55,10 +59,13 @@
                     if (t_value){
                         data['transcript_id'] = t_value.replace(/[\";]/g,'');
                     }
-                    var fpkm_index = transcriptParams.indexOf('fpkm');
+                    var fpkm_index = transcriptParams.indexOf('FPKM');
                     var fpkm_value = transcriptParams[fpkm_index+1];
                     if (fpkm_value){
-                        data['fpkm'] = fpkm_value.replace(/[\";]/g,'');
+                        fpkm_value = parseFloat(fpkm_value.replace(/[\";]/g,''));
+                        data['fpkm'] = fpkm_value;
+                    } else{
+                        data['fpkm'] = 0;
                     }
                     if (! Array.isArray(transcriptsByGene[data['gene_id']])){
                         transcriptsByGene[data['gene_id']] = [];
@@ -69,32 +76,57 @@
                 }
 
             }
-            displayFileData();
+            
+            genesNames = Object.keys(transcriptsByGene);
         }
 
-        function displayFileData(){
-            // fill the options of select with genes names
-            var genesNames = Object.keys(transcriptsByGene);
-            clearAndFillSelect('geneSelect', genesNames);
-            chooseGeneCallback();
+        function search(searchString){ 
+            var matcher = new FuzzyMatch(searchString);
+            var counter = 0;
+            var maxSearches = 100;
+            for (var i=0; i < genesNames.length; i++){
+                if (counter > maxSearches){
+                    return false;
+                }
+                if (matcher.match(genesNames[i])){
+                    // TODO - add to options for autocompelete or something
+                    counter++; 
+                }
+            }
         }
 
-        function chooseGeneCallback(){
-            var geneName = document.getElementById('geneSelect').value;
+        function chooseGene(geneName){
             var transcripts = transcriptsByGene[geneName]; 
-            clearAndFillSelect('transcriptSelect', transcripts);
+            var transcriptsData=[];
+            var orderedTranscripts = [];
+            for (var i = 0; i< transcripts.length; i++){
+                var data = {
+                    'transcript':transcripts[i],
+                    'fpkm': transcriptsInformation[transcripts[i]]['fpkm']
+                };
+                transcriptsData.push(data);
+            }
+            transcriptsData.sort(function(t1,t2){
+                return t2['fpkm'] - t1['fpkm'];
+            });
+            clearAndFillSelect('transcriptSelect', transcriptsData, true);
             // create related options
         }
 
-        function clearAndFillSelect(select_id, options){
+        function clearAndFillSelect(select_id, options, use_keys=false){
             var selectElement = document.getElementById(select_id);
             for (var i = selectElement.options.length - 1; i>=0; i--){
                 selectElement.remove(i);
             }
             for (var i=0; i<options.length; i++){
                 var option = document.createElement("option");
-                option.text = options[i];
-                options.value = options[i];
+                if (use_keys){
+                    option.text = options[i]['transcript'] + ' ' + options[i]['fpkm'];
+                    option.value = options[i]['transcript'];
+                } else{
+                    option.text = options[i];
+                    option.value = options[i];
+                }
                 selectElement.appendChild(option);
             }
 
@@ -102,6 +134,16 @@
 
         function chooseClicked(){
             console.log('chosen');
+        }
+
+        class FuzzyMatch(){
+            constructor(searchString){
+                this.pattern = new RegExp('('+searchString.split('').join(').*?(')+').*?', 'i');
+            }
+
+            match(someString){
+                return someString.match(this.pattern) != null;
+            }
         }
 
     </script>
