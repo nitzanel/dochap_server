@@ -5,12 +5,11 @@ import utils
 import flask
 
 
-def create_html_pack(transcripts,specie):
-    # get needed data
-    genes_ids_dict = get_genes_ids_dict(transcripts)
+def create_html_pack(transcripts, specie, genes):
+    genes_ids_dict = get_genes_ids_dict(transcripts, genes)
     svgs_by_symbol, variants_by_symbol = get_genes_svgs_and_variations(genes_ids_dict,specie)
     db_transcripts_svgs_by_id, db_transcripts_svgs_real_pos_by_id, db_transcript_ids_by_symbol = get_transcripts_svgs(genes_ids_dict,specie)
-    user_svgs_by_id_by_symbol = get_user_svgs_by_id(transcripts,genes_ids_dict)
+    user_svgs_by_id_by_symbol = get_user_svgs_by_id(transcripts,genes_ids_dict, specie)
     # render it
     html = flask.render_template(
         'compare.html',
@@ -28,8 +27,11 @@ def create_html_pack(transcripts,specie):
     return response
 
 
-def get_genes_ids_dict(transcripts):
-    user_gene_transcript_ids_dict = gtf_parser.get_dictionary_of_ids_and_genes(transcripts)
+def get_genes_ids_dict(transcripts: dict, genes: list):
+    if len(genes) == 0:
+        user_gene_transcript_ids_dict = gtf_parser.get_dictionary_of_ids_and_genes(transcripts)
+    else:
+        user_gene_transcript_ids_dict = gtf_parser.get_dictionary_of_ids_and_genes(transcripts, genes)
     return user_gene_transcript_ids_dict
 
 
@@ -73,16 +75,17 @@ def get_transcripts_svgs(genes_ids_dict,specie):
 
     return transcripts_svgs_by_id, transcripts_svgs_real_by_id, db_transcript_ids_by_symbol
 
-def get_user_svgs_by_id(transcripts,genes_ids_dict):
+def get_user_svgs_by_id(transcripts,genes_ids_dict, specie):
     symbols = genes_ids_dict.keys()
     svg_by_symbol_by_id = {}
     for symbol in symbols:
-        transcripts_of_gene = gtf_parser.get_transcripts_by_gene_symbol(transcripts,symbol)
+        transcripts_of_gene = gtf_parser.get_transcripts_by_gene_symbol('data',specie,transcripts,symbol)
         svg_by_symbol_by_id[symbol] = {}
         for t_id, exon_list in transcripts_of_gene.items():
             t_id_text = f'transcript_id: {t_id}'
             svg = draw_tool.draw_exons(exon_list,t_id_text)
             svg_by_symbol_by_id[symbol][t_id] = svg
     return svg_by_symbol_by_id
+
 
 

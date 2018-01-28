@@ -30,7 +30,7 @@ def create_views(app):
     """
     @app.route('/')
     def index():
-        response = flask.render_template('index.html')
+        response = flask.redirect(flask.url_for('upload'))
         return response
 
 
@@ -61,8 +61,9 @@ def create_api(app):
         user_transcripts = utils.parse_gtf_file(save_path)
         os.remove(save_path)
         specie = form.specie_selection.data
-        print(f'specieis: {specie}')
-        flask_response = compare_gen.create_html_pack(user_transcripts,specie)
+        genes = form.genes_selection.data
+        genes = list(set(genes.split(',')))
+        flask_response = compare_gen.create_html_pack(user_transcripts,specie, genes)
         return flask_response
 
 
@@ -84,4 +85,4 @@ def create_nav(app):
 
 if __name__ == '__main__':
     app = create_app()
-    app.run('0.0.0.0',debug=True,port=5555)
+    app.run('0.0.0.0', debug=True, threaded=True, port=5555)

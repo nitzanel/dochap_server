@@ -173,7 +173,8 @@
         }
 
         function chooseClicked(){
-            console.log('chosen');
+            var value = document.getElementById('geneSelect').value;
+            document.getElementById('gene_field').value += value+',';
         }
 
         class FuzzyMatch{
