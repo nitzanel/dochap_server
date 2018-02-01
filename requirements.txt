@@ -1,1 +1,1 @@
-dochap_tool>=1.1.1
+dochap_tool>=1.2.0
