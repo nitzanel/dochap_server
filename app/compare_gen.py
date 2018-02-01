@@ -5,7 +5,9 @@ import utils
 import flask
 
 
-def create_html_pack(transcripts, specie, genes):
+def create_html_pack(transcripts, specie, genes, path = None):
+    if path is None:
+        path = './compare.html'
     genes_ids_dict = get_genes_ids_dict(transcripts, genes)
     svgs_by_symbol, variants_by_symbol = get_genes_svgs_and_variations(genes_ids_dict,specie)
     db_transcripts_svgs_by_id, db_transcripts_svgs_real_pos_by_id, db_transcript_ids_by_symbol = get_transcripts_svgs(genes_ids_dict,specie)
@@ -21,8 +23,12 @@ def create_html_pack(transcripts, specie, genes):
         db_transcript_ids_by_symbol = db_transcript_ids_by_symbol,
         user_transcript_id_svg_dict = user_svgs_by_id_by_symbol,
     )
-    with open('/tmp/compare.html','w') as f:
-        f.write(html)
+    try:
+        with open(path, 'w') as f:
+			f.write(html)
+    except e:
+		print(f'Failed to save output to: {path}')
+		return flask.abort(500)
     response = flask.send_file('/tmp/compare.html',as_attachment=True)
     return response
 
