@@ -16,13 +16,8 @@
         <datalist id="genesOptions"> </datalist>
     </div>
     <div class="row">
-        <div class="col-md-4">
+            gene symbols:
             <select id="geneSelect" onchange="chooseGeneCallback();"> </select>
-        </div>
-        <div class="col-md-4">
-            <select id="transcriptSelect"> </select>
-        </div>
-        <div class="col-md-4">
             <button class="btn-primary" id="addButton" onclick="chooseClicked();">Choose</button>
         </div>
     </div>
@@ -140,8 +135,6 @@
             transcriptsData.sort(function(t1,t2){
                 return t2['fpkm'] - t1['fpkm'];
             });
-            clearAndFillOptions('transcriptSelect', transcriptsData, true);
-            // create related options
         }
 
         function clearAndFillOptions(select_id, options, use_keys=false){
