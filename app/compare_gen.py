@@ -13,7 +13,7 @@ def create_html_pack_better(user_transcripts, specie, genes, run_local: bool=Fal
     html = flask.render_template(
             'compare_transcripts.html',
             genes_ids_dict = genes_ids_dict,
-            transcript_svgs_by_symbol = transcript_svgs_by_symbol
+            svgs_by_symbol = transcript_svgs_by_symbol
             )
     if run_local:
         if save_dir is None:

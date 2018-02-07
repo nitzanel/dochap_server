@@ -20,10 +20,15 @@
 
 {% block scripts %}
     <script type="text/javascript">
-        // set up the gene-ids dict
+        let gens_ids_dict = {{ genes_ids_dict|tojson|safe }};
+        let svgs_by_symbol = {{ svgs_by_symbol|tojson|safe }};
+        for (let key in svgs_by_symbol){
+            console.log('adding key: ' + key);
+            document.getElementById('transcripts_col').innerHTML += '<br>' + svgs_by_symbol[key];
+        }
     </script>
 {% endblock scripts %}
-
+{% block content %}
 <div class="container">
     <div class="row">
             Gene symbol:
