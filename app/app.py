@@ -45,10 +45,6 @@ def create_views(app):
         return flask.render_template('about.html')
 
 
-    @app.route('/introduction')
-    def introduction():
-        return flask.render_template('introduction.html')
-
 def create_api(app):
     """
     Register api routes for the app
@@ -79,7 +75,6 @@ def create_nav(app):
             View('Dochap', 'index'),
             View('Upload', 'upload'),
             View('About', 'about'),
-            View('Introduction','introduction'),
         )
     return nav
 

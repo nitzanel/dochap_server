@@ -99,8 +99,8 @@
             var db_t_id = document.getElementById("db_transcript_id_select").value;
             var symbol = document.getElementById("gene_symbol_select").value;
             var gene_variation = document.getElementById("gene_variation_select").value;
-            var usr_canvas= document.getElementById("user_transcript_col");
-            var db_canvas = document.getElementById("db_transcript_col");
+            var usr_canvas= document.getElementById("transcripts_col");
+            var db_canvas = document.getElementById("domains_col");
 
             clear_canvas(usr_canvas);
             clear_canvas(db_canvas);
@@ -157,9 +157,9 @@
         </div>
     </div>
         <div id="svg_canvas" class="row">
-            <div id="user_transcript_col" class="col-md-6">
+            <div id="transcripts_col" class="col-md-6">
             </div>
-            <div id="db_transcript_col" class="col-md-6">
+            <div id="domains_col" class="col-md-6">
             </div>
         </div>
     <p>

@@ -5,6 +5,23 @@ import utils
 import flask
 
 
+def create_html_pack_better(user_transcripts, specie, genes):
+    genes_ids_dict = get_genes_ids_dict(user_transcripts, genes)
+    # TODO
+    # domains_svgs_variations_by_gene_symbol, variants_by_symbol = get_genes_svgs_and_variations(genes_ids_dict, specie)
+    transcript_svgs_by_symbol = get_transcripts_svgs(user_transcripts, genes_ids_dict, specie)
+    html = flask.render_template(
+            'compare_transcripts.html',
+            genes_ids_dict = genes_ids_dict,
+            transcript_svgs_by_symbol = transcript_svgs_by_symbol
+            )
+    with open('/tmp/compare.html', 'w') as f:
+        f.write(html)
+    response = flask.send_file('/tmp/compare.html', as_attachment=True)
+    return response
+
+
+
 def create_html_pack(transcripts, specie, genes):
     genes_ids_dict = get_genes_ids_dict(transcripts, genes)
     svgs_by_symbol, variants_by_symbol = get_genes_svgs_and_variations(genes_ids_dict,specie)
@@ -27,7 +44,7 @@ def create_html_pack(transcripts, specie, genes):
     return response
 
 
-def get_genes_ids_dict(transcripts: dict, genes: list):
+def get_genes_ids_dict(transcripts: dict, genes: list) -> dict:
     if len(genes) == 0:
         user_gene_transcript_ids_dict = gtf_parser.get_dictionary_of_ids_and_genes(transcripts)
     else:
@@ -54,7 +71,10 @@ def get_genes_svgs_and_variations(genes_ids_dict,specie):
 
     return svgs_by_symbol, variants_by_symbol
 
-def get_transcripts_svgs(genes_ids_dict,specie):
+
+def get_transcripts_svgs(user_transcripts, genes_ids_dict, specie):
+# TODO
+#def get_transcripts_svgs(genes_ids_dict,specie):
     symbols = genes_ids_dict.keys()
     transcripts_dict_by_symbol= {}
     for symbol in symbols:

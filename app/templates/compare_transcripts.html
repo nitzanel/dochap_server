@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}Compare{% endblock title %}
+{% block navbar %}
+{% endblock navbar %}
+{% block styles %}
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+ <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" href= "{{url_for('static',filename='css/my_style.css')}}">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="{{ url_for('static',filename='js_scripts/tooltip_size_fix.js') }}"></script>
+{% endblock styles %}
+
+{% block scripts %}
+    <script type="text/javascript">
+        // set up the gene-ids dict
+    </script>
+{% endblock scripts %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            Gene symbol:
+            <select id="gene_symbol_select">
+            </select>
+        </div>
+        <div class="col-md-6">
+            Domains Variations:
+            <select id="gene_variation_select">
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div id="transcripts_col" class="col-md-6">
+        </div>
+        <div id="domains_col" class="col-md-6">
+        </div>
+    </div>
+</div>
+{{ super() }}
+{% endblock content %}
