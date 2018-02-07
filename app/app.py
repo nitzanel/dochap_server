@@ -28,19 +28,19 @@ def create_views(app):
     """
     Register views for the app
     """
-    @app.route('/')
+    @app.route('/dochap/')
     def index():
         response = flask.redirect(flask.url_for('upload'))
         return response
 
 
-    @app.route('/upload')
+    @app.route('/dochap/upload')
     def upload():
         form = UploadForm()
         return flask.render_template('upload.html',form=form)
 
 
-    @app.route('/about')
+    @app.route('/dochap/about')
     def about():
         return flask.render_template('about.html')
 
@@ -49,7 +49,7 @@ def create_api(app):
     """
     Register api routes for the app
     """
-    @app.route('/api/1.0/gtf_upload',methods=['POST'])
+    @app.route('/dochap/api/1.0/gtf_upload',methods=['POST'])
     def api_gtf_upload():
         form = UploadForm()
         save_path = '/tmp/uploaded_gtf'
@@ -87,4 +87,4 @@ def create_nav(app):
 
 if __name__ == '__main__':
     app = create_app()
-    app.run('0.0.0.0', debug=True, threaded=True, port=5001)
+    app.run('0.0.0.0', debug=False, threaded=True, port=5001)

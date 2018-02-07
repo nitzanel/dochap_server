@@ -11,6 +11,7 @@ ADD ./dochap_tool /dochap_tool
 WORKDIR /dochap_tool
 RUN python /dochap_tool/setup.py install
 WORKDIR /app
+ADD ./app/download_and_setup_db.py /app/download_and_setup_db.py
+RUN python /app/download_and_setup_db.py
 ADD ./app /app
-RUN python download_and_setup_db.py
 CMD ["python", "app.py"]
