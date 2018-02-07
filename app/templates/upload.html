@@ -11,11 +11,11 @@
     <div id="loadDiv" style="visibility:hidden;" class="row">
         <img src="{{ url_for('static', filename='ajax-loader.gif') }}">
     </div>
-    <div class="row">
-        <input type="text" id="geneInput" oninput="geneSearchCallback();" list="genesOptions">
-        <datalist id="genesOptions"> </datalist>
-    </div>
     <div id="onlyWhenOverLimit" style="visibility:hidden;">
+        <div class="row">
+            <input type="text" id="geneInput" oninput="geneSearchCallback();" list="genesOptions">
+            <datalist id="genesOptions"> </datalist>
+        </div>
         <div class="row">
                 gene symbols:
                 <select id="geneSelect" onchange="chooseGeneCallback();"> </select>
