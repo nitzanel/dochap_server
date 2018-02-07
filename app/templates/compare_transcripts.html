@@ -8,39 +8,54 @@
 <meta content="utf-8" http-equiv="encoding">
  <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<link rel="stylesheet" href= "{{url_for('static',filename='css/my_style.css')}}">
-
-<!-- jQuery library -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
-<!-- Latest compiled JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<script src="{{ url_for('static',filename='js_scripts/tooltip_size_fix.js') }}"></script>
+<style>
+    {{ fix_css|safe }}
+</style>
 {% endblock styles %}
 
 {% block scripts %}
-    <script type="text/javascript">
-        let gens_ids_dict = {{ genes_ids_dict|tojson|safe }};
-        let svgs_by_symbol = {{ svgs_by_symbol|tojson|safe }};
+<script type="text/javascript">
+    let svgs_by_symbol = {{ svgs_by_symbol|tojson|safe }};
+    setup();
+    gene_symbol_select_callback();
+
+    function setup(){
+        let select_element = document.getElementById("gene_symbol_select");
         for (let key in svgs_by_symbol){
-            console.log('adding key: ' + key);
-            document.getElementById('transcripts_col').innerHTML += '<br>' + svgs_by_symbol[key];
+            let opt = document.createElement('option');
+            opt.value = key;
+            opt.innerHTML = key;
+            select_element.appendChild(opt);
         }
+    }
+
+    function set_transcripts_svg(gene_symbol){
+        let canvas = document.getElementById('transcripts_col');
+        canvas.innerHTML = svgs_by_symbol[gene_symbol];
+        fix_all();
+    }
+
+    function gene_symbol_select_callback(){
+        let key = document.getElementById("gene_symbol_select").value;
+        set_transcripts_svg(key);
+    }
+</script>
+    <script type="text/javascript">
+        {{ fix_js|safe }}
     </script>
 {% endblock scripts %}
 {% block content %}
 <div class="container">
     <div class="row">
             Gene symbol:
-            <select id="gene_symbol_select">
+            <select id="gene_symbol_select" onchange="gene_symbol_select_callback();">
             </select>
     </div>
     <div class="row">
-        <div id="transcripts_col" class="col-md-6">
+        <div id="transcripts_col" class="col-md-6" >
         </div>
         <div id="domains_col" class="col-md-6">
         </div>
     </div>
 </div>
-{{ super() }}
 {% endblock content %}

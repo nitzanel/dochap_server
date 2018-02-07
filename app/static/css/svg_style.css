@@ -1,0 +1,83 @@
+.exon .special_rect_tooltip {
+    visibility: hidden;
+}
+.exon:hover .special_rect_tooltip {
+    visibility: visible;
+}
+
+rect:hover{
+    opacity: 0.7
+}
+
+.special_rect_tooltip text {
+    fill: yellow;
+    font-size: 16px;
+    font-family: sans-serif;
+}
+
+.special_rect_tooltip:hover rect{
+    opacity: 1.0
+}
+
+.transcript_id_rect .special_rect_tooltip{
+    visibility: hidden;
+}
+
+.transcript_id_rect:hover .special_rect_tooltip {
+    visibility: visible;
+}
+
+.exon_group:hover rect{
+    opacity: 1.0;
+}
+
+.match_status_group .special_rect_tooltip{
+    visibility: hidden;
+}
+
+.match_status_group:hover .special_rect_tooltip {
+    visibility: visible;
+}
+
+.arcs_group:hover{
+    opacity:1.0;
+}
+
+.user_transcript_no_match{
+    opacity: 0.8;
+}
+
+.db_transcript_no_match{
+    opacity: 0.8;
+}
+
+.user_transcript_matched{
+    /* hiding behind the db_transcript that matches them, set to invisible */
+    visibility: hidden;
+}
+
+.db_transcript_matched{
+    opacity: 0.8;
+}
+
+
+polyline:hover{
+    opacity:1.0;
+}
+
+line{
+    opacity:0.5;
+}
+
+line:hover{
+    opacity:1.0;
+}
+
+path:hover{
+    opacity:1.0;
+}
+
+path {
+  fill: none;
+  stroke-width: 1.5px;
+}

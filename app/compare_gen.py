@@ -7,13 +7,21 @@ import flask
 
 
 def create_html_pack_better(user_transcripts, specie, genes, run_local: bool=False, save_dir: str=None, file_name: str='compare.html'):
+    print('genes are', genes)
+    print('user_transcripts are of length', len(user_transcripts))
     genes_ids_dict = get_genes_ids_dict(user_transcripts, genes)
+    user_transcripts = gtf_parser.get_dictionary_of_exons_and_genes(user_transcripts)
     # domains_svgs_variations_by_gene_symbol, variants_by_symbol = get_genes_svgs_and_variations(genes_ids_dict, specie)
     transcript_svgs_by_symbol = get_svgs(user_transcripts, genes_ids_dict, specie)
+    with open('./static/css/svg_style.css','r') as f:
+        fix_css = f.read()
+    with open('./static/js_scripts/tooltip_size_fix.js','r') as f:
+        fix_js = f.read()
     html = flask.render_template(
             'compare_transcripts.html',
-            genes_ids_dict = genes_ids_dict,
-            svgs_by_symbol = transcript_svgs_by_symbol
+            svgs_by_symbol = transcript_svgs_by_symbol,
+            fix_css = fix_css,
+            fix_js = fix_js
             )
     if run_local:
         if save_dir is None:
@@ -36,16 +44,27 @@ def get_genes_ids_dict(transcripts: dict, genes: list) -> dict:
     if len(genes) == 0:
         user_gene_transcript_ids_dict = gtf_parser.get_dictionary_of_ids_and_genes(transcripts)
     else:
+        if genes[0] == '':
+            # insanity check
+            genes = None
         user_gene_transcript_ids_dict = gtf_parser.get_dictionary_of_ids_and_genes(transcripts, genes)
+    print(user_gene_transcript_ids_dict)
     return user_gene_transcript_ids_dict
 
 
 def get_svgs(user_transcripts: dict, genes_ids_dict: dict, specie:str):
     svgs_by_symbol = {}
     symbols = genes_ids_dict.keys()
+    print('symbols are: ', symbols)
     for symbol in symbols:
-        db_transcripts_dict = compare_exons.get_exons_from_gene_symbol('data',specie,symbol)
+        gene_symbol = gtf_parser.get_gene_symbol_from_transcript_ids('data', specie, user_transcripts[symbol].keys())
+        print('GENE SYMBOL IS', gene_symbol)
         user_transcripts_dict = user_transcripts[symbol]
+        svg = None
+        if gene_symbol is None:
+            print('could not find ncbi symbol for ', symbol)
+            continue
+        db_transcripts_dict = compare_exons.get_exons_from_gene_symbol('data',specie,gene_symbol)
         svg = draw_tool.draw_combination(symbol, user_transcripts_dict, 'blue', db_transcripts_dict, 'purple')
         svgs_by_symbol[symbol] = svg
     return svgs_by_symbol
