@@ -9,9 +9,8 @@ import flask
 
 def create_html_pack_better(user_transcripts, specie, genes, run_local: bool=False, save_dir: str=None, file_name: str='compare.html'):
     genes_ids_dict = get_genes_ids_dict(user_transcripts, genes)
-    # TODO
     # domains_svgs_variations_by_gene_symbol, variants_by_symbol = get_genes_svgs_and_variations(genes_ids_dict, specie)
-    transcript_svgs_by_symbol = get_transcripts_svgs(user_transcripts, genes_ids_dict, specie)
+    transcript_svgs_by_symbol = get_svgs(user_transcripts, genes_ids_dict, specie)
     html = flask.render_template(
             'compare_transcripts.html',
             genes_ids_dict = genes_ids_dict,
@@ -20,7 +19,7 @@ def create_html_pack_better(user_transcripts, specie, genes, run_local: bool=Fal
     if run_local:
         if save_dir is None:
             save_dir = './output'
-        pathlib.Path(save_dir.mkdir(parents=True, exist_ok=True)
+        pathlib.Path(save_dir.mkdir(parents=True, exist_ok=True))
     else:
         save_dir = '/tmp'
     with open(os.path.join(save_dir, file_name), 'w') as f:
@@ -34,32 +33,6 @@ def create_html_pack_better(user_transcripts, specie, genes, run_local: bool=Fal
     return response
 
 
-def create_html_pack(transcripts, specie, genes):
-    genes_ids_dict = get_genes_ids_dict(transcripts, genes)
-    svgs_by_symbol, variants_by_symbol = get_genes_svgs_and_variations(genes_ids_dict,specie)
-    db_transcripts_svgs_by_id, db_transcripts_svgs_real_pos_by_id, db_transcript_ids_by_symbol = get_transcripts_svgs(genes_ids_dict,specie)
-    user_svgs_by_id_by_symbol = get_user_svgs_by_id(transcripts,genes_ids_dict, specie)
-    # render it
-    html = flask.render_template(
-        'compare.html',
-        genes_ids_dict = genes_ids_dict,
-        db_gene_svg_list_dict = svgs_by_symbol,
-        gene_variations_dict = variants_by_symbol,
-        db_transcript_id_svg_dict = db_transcripts_svgs_by_id,
-        db_transcript_id_svg_real_dict = db_transcripts_svgs_real_pos_by_id,
-        db_transcript_ids_by_symbol = db_transcript_ids_by_symbol,
-        user_transcript_id_svg_dict = user_svgs_by_id_by_symbol,
-    )
-    try:
-        with open(path, 'w') as f:
-			f.write(html)
-    except e:
-		print(f'Failed to save output to: {path}')
-		return flask.abort(500)
-    response = flask.send_file('/tmp/compare.html',as_attachment=True)
-    return response
-
-
 def get_genes_ids_dict(transcripts: dict, genes: list) -> dict:
     if len(genes) == 0:
         user_gene_transcript_ids_dict = gtf_parser.get_dictionary_of_ids_and_genes(transcripts)
@@ -68,70 +41,12 @@ def get_genes_ids_dict(transcripts: dict, genes: list) -> dict:
     return user_gene_transcript_ids_dict
 
 
-def get_genes_svgs_and_variations(genes_ids_dict,specie):
-    symbols = genes_ids_dict.keys()
-    domains_by_symbol = {}
-    for symbol in symbols:
-        domains_by_symbol[symbol] = compare_exons.get_domains_of_gene_symbol('data',specie,symbol.lower())
-    variants_by_symbol = {}
+def get_svgs(user_transcripts: dict, genes_ids_dict: dict, specie:str):
     svgs_by_symbol = {}
-    for symbol in domains_by_symbol:
-        svgs_by_symbol[symbol] = []
-        variants_by_symbol[symbol] = []
-        domains_variants = domains_by_symbol[symbol]
-        for index,domain_variant in enumerate(domains_variants):
-            variant_text = f'domains variant: {index+1}'
-            svg=draw_tool.draw_domains(domain_variant,variant_text)
-            svgs_by_symbol[symbol].append(svg)
-            variants_by_symbol[symbol].append(variant_text)
-
-    return svgs_by_symbol, variants_by_symbol
-
-
-
-def get_svgs(user_transcripts, genes_ids_dict, specie):
-    svgs_by_symbols = {}
     symbols = genes_ids_dict.keys()
-    transcripts_dict_by_symbol = {}
     for symbol in symbols:
-        transcripts_dict = compare_exons.get_exons_from_gene_symbol('data',specie,symbol)
-        transcripts_dict_by_symbol[symbol] = transcripts_dict
-
-
-
-def get_transcripts_svgs(user_transcripts, genes_ids_dict, specie):
-    svgs_by_symbols = {}
-    symbols = genes_ids_dict.keys()
-    transcripts_dict_by_symbol= {}
-    for symbol in symbols:
-        transcripts_dict = compare_exons.get_exons_from_gene_symbol('data',specie,symbol)
-        transcripts_dict_by_symbol[symbol] = transcripts_dict
-    transcripts_svgs_by_id = {}
-    transcripts_svgs_real_by_id = {}
-    db_transcript_ids_by_symbol = {}
-    for symbol in transcripts_dict_by_symbol:
-        db_transcript_ids_by_symbol[symbol] = []
-        for t_id,exon_list in transcripts_dict_by_symbol[symbol].items():
-            t_id_text = f'transcript_id: {t_id}'
-            svg = draw_tool.draw_exons(exon_list,t_id_text)
-            real_svg = draw_tool.draw_exons(exon_list, id_text);
-            transcripts_svgs_by_id[t_id] = svg
-            transcripts_svgs_real_by_id[t_id] = real_svg
-            db_transcript_ids_by_symbol[symbol].append(t_id)
-
-    return transcripts_svgs_by_id, transcripts_svgs_real_by_id, db_transcript_ids_by_symbol
-
-def get_user_svgs_by_id(transcripts,genes_ids_dict, specie):
-    symbols = genes_ids_dict.keys()
-    svg_by_symbol_by_id = {}
-    for symbol in symbols:
-        transcripts_of_gene = gtf_parser.get_transcripts_by_gene_symbol('data',specie,transcripts,symbol)
-        svg_by_symbol_by_id[symbol] = {}
-        for t_id, exon_list in transcripts_of_gene.items():
-            t_id_text = f'transcript_id: {t_id}'
-            svg = draw_tool.draw_exons(exon_list,t_id_text)
-            svg_by_symbol_by_id[symbol][t_id] = svg
-    return svg_by_symbol_by_id
-
-
-
+        db_transcripts_dict = compare_exons.get_exons_from_gene_symbol('data',specie,symbol)
+        user_transcripts_dict = user_transcripts[symbol]
+        svg = draw_tool.draw_combination(symbol, user_transcripts_dict, 'blue', db_transcripts_dict, 'purple')
+        svgs_by_symbol[symbol] = svg
+    return svgs_by_symbol
