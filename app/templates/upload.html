@@ -15,14 +15,16 @@
         <input type="text" id="geneInput" oninput="geneSearchCallback();" list="genesOptions">
         <datalist id="genesOptions"> </datalist>
     </div>
-    <div class="row">
-            gene symbols:
-            <select id="geneSelect" onchange="chooseGeneCallback();"> </select>
-            <button class="btn-primary" id="addButton" onclick="chooseClicked();">Choose</button>
+    <div id="onlyWhenOverLimit" style="visibility:hidden;">
+        <div class="row">
+                gene symbols:
+                <select id="geneSelect" onchange="chooseGeneCallback();"> </select>
+                <button class="btn-primary" id="addButton" onclick="chooseClicked();">Choose</button>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div id="selectedGenes">
+        <div class="row">
+            <div id="selectedGenes">
+            </div>
         </div>
     </div>
     {{ utils.flashed_messages() }}
@@ -42,8 +44,8 @@
             var name = file.name;
             var fileSize = file.size;
             if (fileSize > 10000000){
-                //alert("file " + name+ " Is over the size limit (10mb)");
-                //return;
+                alert("file " + name+ " Is over the size limit (10mb), please choose genes to parse");
+                document.getElementById('onlyWhenOverLimit').style.visibility = 'visible';
             }
             var reader = new FileReader();
             reader.readAsText(file);
