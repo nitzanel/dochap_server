@@ -79,4 +79,3 @@ function fix_all(){
     fix_ids();
 }
 window.onload = fix_all;
-
