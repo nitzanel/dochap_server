@@ -5,7 +5,7 @@ import os
 
 def main():
     species = ['Mus_musculus','Homo_sapiens']
-    ncbi_downloader.download_species_from_ncbi(species,'data')
+#    ncbi_downloader.download_species_from_ncbi(species,'data')
     ucsc_downloader.download_from_ucsc(species,'data')
     for specie in species:
         create_db.create_db('data',specie)

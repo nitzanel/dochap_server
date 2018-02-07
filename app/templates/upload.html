@@ -1,37 +1,39 @@
-{% extends "base.html" %} 
-{% import "bootstrap/wtf.html" as wtf %} 
-{% block title %}File Upload{% endblock title %} 
-{% block content %} 
-<div class = "container"> 
-{{ wtf.quick_form(form,action=url_for('api_gtf_upload'),method="post") }} 
-<br>
-<div id="loadDiv" style="visibility:hidden;" class="row">
-    <img src="{{ url_for('static', filename='ajax-loader.gif') }}">
-</div>
-<div class="row">
-    <input type="text" id="geneInput" oninput="geneSearchCallback();" list="genesOptions">
-    <datalist id="genesOptions"> </datalist>
-</div>
-<div class="row">
-    <div class="col-md-4">
-        <select id="geneSelect" onchange="chooseGeneCallback();"> </select>
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "bootstra/utils.html" as utils %}
+{% block title %}File Upload{% endblock title %}
+{% block content %}
+<div class = "container">
+    {{ wtf.quick_form(form,action=url_for('api_gtf_upload'),method="post") }}
+    <br>
+    <div id="loadDiv" style="visibility:hidden;" class="row">
+        <img src="{{ url_for('static', filename='ajax-loader.gif') }}">
     </div>
-    <div class="col-md-4">
-        <select id="transcriptSelect"> </select>
+    <div class="row">
+        <input type="text" id="geneInput" oninput="geneSearchCallback();" list="genesOptions">
+        <datalist id="genesOptions"> </datalist>
     </div>
-    <div class="col-md-4">
-        <button class="btn-primary" id="addButton" onclick="chooseClicked();">Choose</button>
+    <div class="row">
+        <div class="col-md-4">
+            <select id="geneSelect" onchange="chooseGeneCallback();"> </select>
+        </div>
+        <div class="col-md-4">
+            <select id="transcriptSelect"> </select>
+        </div>
+        <div class="col-md-4">
+            <button class="btn-primary" id="addButton" onclick="chooseClicked();">Choose</button>
+        </div>
     </div>
-</div>
-<div id="selectedGenes">
+    <div id="selectedGenes">
+    </div>
+    {{ utils.flashed_messages() }}
 </div>
 
-</div> 
-{{ super() }} 
-{% endblock content %} 
+{{ super() }}
+{% endblock content %}
 {% block scripts %}
     <script>
-        var transcriptsInformation = {}; 
+        var transcriptsInformation = {};
         var transcriptsByGene = {};
         var genesNames = [];
 

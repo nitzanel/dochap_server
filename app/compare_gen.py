@@ -2,10 +2,12 @@ from dochap_tool.gtf_utils import parser as gtf_parser
 from dochap_tool.draw_utils import draw_tool
 from dochap_tool.compare_utils import compare_exons
 import utils
+import pathlib
+import os
 import flask
 
 
-def create_html_pack_better(user_transcripts, specie, genes):
+def create_html_pack_better(user_transcripts, specie, genes, run_local: bool=False, save_dir: str=None, file_name: str='compare.html'):
     genes_ids_dict = get_genes_ids_dict(user_transcripts, genes)
     # TODO
     # domains_svgs_variations_by_gene_symbol, variants_by_symbol = get_genes_svgs_and_variations(genes_ids_dict, specie)
@@ -15,11 +17,21 @@ def create_html_pack_better(user_transcripts, specie, genes):
             genes_ids_dict = genes_ids_dict,
             transcript_svgs_by_symbol = transcript_svgs_by_symbol
             )
-    with open('/tmp/compare.html', 'w') as f:
+    if run_local:
+        if save_dir is None:
+            save_dir = './output'
+        pathlib.Path(save_dir.mkdir(parents=True, exist_ok=True)
+    else:
+        save_dir = '/tmp'
+    with open(os.path.join(save_dir, file_name), 'w') as f:
         f.write(html)
+    flask.flash('Parsing complete!', category='success')
+    if run_local:
+        flask.flash(f'The file can be found at: {os.path.join(save_dir,file_name)}', category='information')
+        return flask.redirect('upload')
+    flask.flash('Download starts...', category='information')
     response = flask.send_file('/tmp/compare.html', as_attachment=True)
     return response
-
 
 
 def create_html_pack(transcripts, specie, genes):
@@ -38,8 +50,12 @@ def create_html_pack(transcripts, specie, genes):
         db_transcript_ids_by_symbol = db_transcript_ids_by_symbol,
         user_transcript_id_svg_dict = user_svgs_by_id_by_symbol,
     )
-    with open('/tmp/compare.html','w') as f:
-        f.write(html)
+    try:
+        with open(path, 'w') as f:
+			f.write(html)
+    except e:
+		print(f'Failed to save output to: {path}')
+		return flask.abort(500)
     response = flask.send_file('/tmp/compare.html',as_attachment=True)
     return response
 
@@ -72,9 +88,19 @@ def get_genes_svgs_and_variations(genes_ids_dict,specie):
     return svgs_by_symbol, variants_by_symbol
 
 
+
+def get_svgs(user_transcripts, genes_ids_dict, specie):
+    svgs_by_symbols = {}
+    symbols = genes_ids_dict.keys()
+    transcripts_dict_by_symbol = {}
+    for symbol in symbols:
+        transcripts_dict = compare_exons.get_exons_from_gene_symbol('data',specie,symbol)
+        transcripts_dict_by_symbol[symbol] = transcripts_dict
+
+
+
 def get_transcripts_svgs(user_transcripts, genes_ids_dict, specie):
-# TODO
-#def get_transcripts_svgs(genes_ids_dict,specie):
+    svgs_by_symbols = {}
     symbols = genes_ids_dict.keys()
     transcripts_dict_by_symbol= {}
     for symbol in symbols:
