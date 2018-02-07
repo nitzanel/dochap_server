@@ -4,7 +4,9 @@
 {% block title %}File Upload{% endblock title %}
 {% block content %}
 <div class = "container">
+    <div class="row">
     {{ wtf.quick_form(form,action=url_for('api_gtf_upload'),method="post") }}
+    </div>
     <br>
     <div id="loadDiv" style="visibility:hidden;" class="row">
         <img src="{{ url_for('static', filename='ajax-loader.gif') }}">
@@ -24,7 +26,9 @@
             <button class="btn-primary" id="addButton" onclick="chooseClicked();">Choose</button>
         </div>
     </div>
-    <div id="selectedGenes">
+    <div class="row">
+        <div id="selectedGenes">
+        </div>
     </div>
     {{ utils.flashed_messages() }}
 </div>

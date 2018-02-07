@@ -1,7 +1,6 @@
 from dochap_tool.gtf_utils import parser as gtf_parser
 from dochap_tool.draw_utils import draw_tool
 from dochap_tool.compare_utils import compare_exons
-import utils
 import pathlib
 import os
 import flask
