@@ -7,6 +7,7 @@ from flask_appconfig import AppConfig
 from flask_bootstrap import Bootstrap
 from flask_nav import Nav
 from flask_nav.elements import Navbar, View, Text
+from flaskext.markdown import Markdown
 from forms import UploadForm
 from jinja2 import Environment, FileSystemLoader
 # dochap tool
@@ -17,6 +18,7 @@ def create_app(config_file=None):
     AppConfig(app,config_file)
     app.config['TEMPLATES_AUTO_RELOAD'] = True
     Bootstrap(app)
+    Markdown(app)
     create_views(app)
     create_api(app)
     create_nav(app)
@@ -42,7 +44,10 @@ def create_views(app):
 
     @app.route('/dochap/about')
     def about():
-        return flask.render_template('about.html')
+        about_text = ""
+        with open('./templates/markdown/about.md', 'r') as f:
+            about_text = f.read()
+        return flask.render_template('about.html', about_text=about_text)
 
 
 def create_api(app):

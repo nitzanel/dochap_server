@@ -2,8 +2,6 @@
 {% block title %}About{% endblock title %}
 {% block content %}
 <div class="container">
-    <h2> Information about dochap </h2>
-    <h3><a href="https://github.com/nitzanel/dochap_tool">Link to github</a></h3>
+    {{ about_text | markdown }}
 </div>
-{{ super() }}
 {% endblock content %}
